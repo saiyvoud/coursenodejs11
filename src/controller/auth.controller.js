@@ -10,7 +10,7 @@ import { SECREAT_KEY } from "../config/globalKey.js";
 import connected from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { EMessage, ROLE, SMessage } from "../service/message.js";
-import { GenerateToken } from "../service/service.js";
+import { GenerateToken, VerifyRefreshToken, VerifyToken } from "../service/service.js";
 export default class AuthController {
   static async getAll(req, res) {
     try {
@@ -32,6 +32,73 @@ export default class AuthController {
         if (err) return SendError(res, 404, EMessage.NotFound + " user", err);
         if (!result[0]) return SendError(res, 404, EMessage.NotFound + " user");
         return SendSuccess(res, SMessage.SelectOne, result[0]);
+      });
+    } catch (error) {
+      return SendError(res, 500, EMessage.ServerError, error);
+    }
+  }
+  static async forgotPassword(req, res) {
+    try {
+      const { email, newPassword } = req.body;
+      const validate = await ValidateData({ email, newPassword });
+      if (validate.length > 0) {
+        return SendError400(res, EMessage.PleaseInput + validate.join(","));
+      }
+
+      const checkEmail = "select * from user where email=?";
+      connected.query(checkEmail, email, (err, result) => {
+        if (err) return SendError(res, 404, EMessage.NotFound + "email", err);
+        if (!result[0])
+          return SendError(res, 404, EMessage.NotFound + " email");
+        const genPassword = CryptoJS.AES.encrypt(
+          newPassword,
+          SECREAT_KEY
+        ).toString();
+        const update = "Update user set password=? where uuid=?";
+        connected.query(
+          update,
+          [genPassword, result[0]["uuid"]],
+          (error, data) => {
+            if (error) return SendError(res, 404, EMessage.NotFound, error);
+            return SendSuccess(res, SMessage.Update);
+          }
+        );
+      });
+    } catch (error) {
+      return SendError(res, 500, EMessage.ServerError, error);
+    }
+  }
+  static async changePassword(req, res) {
+    try {
+      const uuid = req.user;
+
+      const { oldPassword, newPassword } = req.body;
+      const validate = await ValidateData({ oldPassword, newPassword });
+      if (validate.length > 0) {
+        return SendError400(res, EMessage.PleaseInput + validate.join(","));
+      }
+      const checkPassword = "Select * from user where uuid=?";
+      connected.query(checkPassword, uuid, (err, result) => {
+        if (err) return SendError(res, 404, EMessage.NotFound + " user", err);
+        if (!result[0]) return SendError(res, 404, EMessage.NotFound);
+        const decrypt = CryptoJS.AES.decrypt(
+          result[0]["password"],
+          SECREAT_KEY
+        ).toString(CryptoJS.enc.Utf8);
+
+        if (oldPassword !== decrypt) {
+          return SendError(res, 404, EMessage.IsMatch);
+        }
+        const update = "update user set password=? where uuid=?";
+        const genPassword = CryptoJS.AES.encrypt(
+          newPassword,
+          SECREAT_KEY
+        ).toString();
+        connected.query(update, [genPassword, result[0]["uuid"]], (error) => {
+          if (error) return SendError(res, 404, EMessage.ErrorUpdate, error);
+
+          return SendSuccess(res, SMessage.Update);
+        });
       });
     } catch (error) {
       return SendError(res, 500, EMessage.ServerError, error);
@@ -75,6 +142,17 @@ export default class AuthController {
       return SendError(res, 500, EMessage.ServerError, error);
     }
   }
+  static async refreshToken (req,res){
+    try {
+      const {refreshToken} = req.body;
+      if(!refreshToken) return SendError400(res,EMessage.BadRequest + " refreshToken");
+      const verify = await VerifyRefreshToken(refreshToken);
+      if(!verify) return SendError(res,404,EMessage.NotFound);
+      return SendSuccess(res,SMessage.Update , verify);
+    } catch (error) {
+      return SendError(res, 500, EMessage.ServerError, error);
+    }
+  }
   static async register(req, res) {
     try {
       const { username, email, phoneNumber, password } = req.body;
@@ -108,6 +186,7 @@ export default class AuthController {
         const insert = `INSERT INTO user 
         (uuid,username,phoneNumber,email,password,role,createdAt,updatedAt) 
         VALUES (?,?,?,?,?,?,?,?) `;
+        // let nsert = "INSERT INTO user (uuid,username,phoneNumber,email,password,role,createdAt,updatedAt ) VALUES (?,?,?,?,?,?,?,?) ";
         connected.query(
           insert,
           [

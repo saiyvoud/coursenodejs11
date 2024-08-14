@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 import { SECREAT_KEY, SECREAT_KEY_REFRESH } from "../config/globalKey.js";
 import CryptoJS from "crypto-js";
 import connected from "../config/db.js";
+import { SendError } from "./response.js";
+import { EMessage } from "./message.js";
 export const CheckEmail = async (email) => {
   return new Promise(async (resovle, reject) => {
     try {
@@ -12,6 +14,54 @@ export const CheckEmail = async (email) => {
         resovle(true);
       });
     } catch (error) {
+      reject(error);
+    }
+  });
+};
+export const VerifyRefreshToken = async (refresh) => {
+  return new Promise(async (resovle, reject) => {
+    try {
+      jwt.verify(refresh, SECREAT_KEY_REFRESH.toString(), async (err, decode) => {
+        if (err) reject(err);
+        const decript = CryptoJS.AES.decrypt(decode.id, SECREAT_KEY_REFRESH).toString(
+          CryptoJS.enc.Utf8
+        );
+        const checkUuid = "Select * from user where uuid=?";
+        connected.query(checkUuid, decript, async (error, result) => {
+          if (error) reject(error);
+          if (!result[0]) reject(EMessage.Unauthorized);
+          const data = {
+            id: result[0]["uuid"],
+          };
+          const token = await GenerateToken(data);
+          if (!token) reject("Error Genpassword");
+          resovle(token);
+        });
+      });
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+};
+
+export const VerifyToken = async (token) => {
+  return new Promise(async (resovle, reject) => {
+    try {
+      jwt.verify(token, SECREAT_KEY.toString(), async (err, decode) => {
+        if (err) reject(err);
+        const decript = CryptoJS.AES.decrypt(decode.id, SECREAT_KEY).toString(
+          CryptoJS.enc.Utf8
+        );
+        const checkUuid = "Select * from user where uuid=?";
+        connected.query(checkUuid, decript, (error, result) => {
+          if (error) reject(error);
+          if (!result[0]) reject(EMessage.Unauthorized);
+          resovle(result[0]);
+        });
+      });
+    } catch (error) {
+      console.log(error);
       reject(error);
     }
   });
