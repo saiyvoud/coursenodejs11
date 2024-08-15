@@ -13,9 +13,10 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import router from "./router/route.js";
 import { PORT } from "./config/globalKey.js";
+import fileUpload from "express-fileupload";
 const app = express();
 app.use(cors()); // ແມ່ນການເອີ້ນ request ຂໍ້ມູນ ແລະ response ຂໍ້ມູນ
-
+app.use(fileUpload());
 app.use(bodyParser.json({ extended: true, limit: "500mb" })); // ແປງຂໍ້ມູນ string ເປັນ json
 app.use(
   bodyParser.urlencoded({ extended: true, parameterLimit: 500, limit: "500mb" })
