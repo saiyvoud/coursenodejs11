@@ -25,7 +25,7 @@ export default class BannerController {
   }
   static async getOne(req, res) {
     try {
-      const uuid = req.params.uuid; // 1 body: {} 2 params ແມ່ນ string ທີ່ຈະຢູ່ກັບ url , 3 query ຄ້າຍຄືກັບ params ແຕ່ສາມາດຂຽນຂໍ້ມູນໃນ url ໄດ້
+      const uuid = req.params.bUuid; // 1 body: {} 2 params ແມ່ນ string ທີ່ຈະຢູ່ກັບ url , 3 query ຄ້າຍຄືກັບ params ແຕ່ສາມາດຂຽນຂໍ້ມູນໃນ url ໄດ້
       const checkUuid = "select * from banner where bUuid=?";
       connected.query(checkUuid, uuid, (err, result) => {
         if (err) return SendError(res, 404, EMessage.NotFound + " banner", err);
@@ -94,13 +94,16 @@ export default class BannerController {
     try {
       const bUuid = req.params.bUuid;
       if (!bUuid) return SendError400(res, EMessage.BadRequest + "bUuid");
-      const mysql = "delete  from banner where bUuid=?";
-      connected.query(mysql, bUuid, (err, result) => {
-        if (err) return SendError400(res, EMessage.NotFound, err);
-        if (!result[0]) {
-          return SendError(res, 404, EMessage.NotFound + " id");
-        }
-        return SendSuccess(res, SMessage.Delete);
+      const checkBanner = "select * from banner where bUuid=?";
+      connected.query(checkBanner, bUuid, (error, result) => {
+        if (error) return SendError400(res, EMessage.NotFound, err);
+        if(!result[0]) return SendError(res,404,EMessage.NotFound + " id")
+        const mysql = "delete from banner where bUuid=?";
+        connected.query(mysql, bUuid, (err) => {
+          if (err) return SendError400(res, EMessage.NotFound, err);
+
+          return SendSuccess(res, SMessage.Delete);
+        });
       });
     } catch (error) {
       return SendError(res, 500, EMessage.ServerError, error);
