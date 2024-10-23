@@ -3,6 +3,12 @@ export const ROLE = {
   admin: "admin",
   user: "user",
 };
+export const StatusOrder ={
+  await: "await",
+  padding: "padding",
+  success: "success",
+  cancel: "cancel",
+}
 export const SMessage = {
   // Succes Message
   Register: "Register Success",

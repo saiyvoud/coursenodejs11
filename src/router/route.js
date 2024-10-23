@@ -1,4 +1,5 @@
 import express from "express";
+import AddressController from "../controller/address.controller.js";
 import AuthController from "../controller/auth.controller.js";
 import BannerController from "../controller/banner.controller.js";
 import CategoryController from "../controller/category.controller.js";
@@ -32,5 +33,12 @@ router.get("/product/getOne/:pUuid", ProductController.getOne);
 router.get("/product/getBy/:categoryID", ProductController.getByCategory);
 router.put("/product/update/:pUuid",auth,ProductController.updateProduct);
 router.delete("/product/delete/:pUuid",auth,ProductController.deleteProduct);
+// -------- address -----
+router.post("/address/insert",auth,AddressController.insert);
+router.get("/address/getAll",auth, AddressController.getAll);
+router.get("/address/getOne/:aUuid", auth, AddressController.getOne);
+router.get("/address/getBy/:user_id", auth, AddressController.getByUser);
+router.put("/address/update/:aUuid",auth,AddressController.updateAddress);
+router.delete("/address/delete/:aUuid",auth,AddressController.deleteAddress);
 
 export default router;

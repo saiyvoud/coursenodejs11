@@ -1,0 +1,14 @@
+listen 443 ssl;
+ssl_certificate /etc/nginx/ssl/your_domain.crt;
+ssl_certificate_key /etc/nginx/ssl/your_domain.key;
+
+sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/nginx/ssl/btp.key -out etc/nginx/ssl/btp.csr
+
+sudo chmod 400 btp.key
+sudo chmod 444 btp.crt
+
+server {
+    listen 443;
+    server_name ec2-54-254-184-71.ap-southeast-1.compute.amazonaws.com;
+    return 301 https://$server_name$request_uri;
+}
