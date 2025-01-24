@@ -3,6 +3,7 @@ import AddressController from "../controller/address.controller.js";
 import AuthController from "../controller/auth.controller.js";
 import BannerController from "../controller/banner.controller.js";
 import CategoryController from "../controller/category.controller.js";
+import OrderController from "../controller/order.controller.js";
 import ProductController from "../controller/product.controller.js";
 import { auth } from "../middleware/auth.js";
 const router = express.Router();
@@ -40,5 +41,14 @@ router.get("/address/getOne/:aUuid", auth, AddressController.getOne);
 router.get("/address/getBy/:user_id", auth, AddressController.getByUser);
 router.put("/address/update/:aUuid",auth,AddressController.updateAddress);
 router.delete("/address/delete/:aUuid",auth,AddressController.deleteAddress);
+// -------- order -----
+router.post("/order/insert",auth,OrderController.insert);
+router.get("/order/getAll",auth, OrderController.getAll);
+router.get("/order/getOne/:oUuid", auth, OrderController.getOne);
+router.get("/order/getBy/:userID", auth, OrderController.getBy);
+router.post("/order/getByStatus/:userID", auth, OrderController.getByStatus);
+router.put("/order/updateStatus/:oUuid",auth,OrderController.UpdateOrderStatus);
+router.put("/order/update/:oUuid",auth,OrderController.UpdateOrder);
+router.delete("/order/delete/:oUuid",auth,OrderController.deleteOrder);
 
 export default router;
