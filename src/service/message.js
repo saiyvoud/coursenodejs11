@@ -15,6 +15,7 @@ export const SMessage = {
   Login: "Login Success",
   Insert: "Insert Success",
   SelectAll: "Select All Success",
+  SelectBy: "Select By Success",
   SelectOne: "Select One Success",
   Update: "Update Success",
   Delete: "Delete Success",

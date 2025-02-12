@@ -14,7 +14,7 @@ export default class ProductController {
     try {
       const category = `Select productID,pUuid,name,detail,amount,price,image,category.cUuid,category.title
        ,product.createdAt,product.updatedAt from product 
-        INNER JOIN category  on category.cUuid = product.categoryID`;
+        INNER JOIN category  on category.cUuid  COLLATE utf8mb4_general_ci = product.categoryID`;
       connected.query(category, (err, result) => {
         if (err)
           return SendError(res, 404, EMessage.NotFound + " product", err);
@@ -31,7 +31,7 @@ export default class ProductController {
       const uuid = req.params.pUuid;
       const checkUuid = `Select productID,pUuid,name,detail,amount,price,image,category.title
       ,product.createdAt,product.updatedAt from product 
-       INNER JOIN category on category.cUuid = product.categoryID
+       INNER JOIN category on category.cUuid COLLATE utf8mb4_general_ci = product.categoryID
        where product.pUuid=? `;
       connected.query(checkUuid, uuid, (err, result) => {
         if (err)
@@ -49,7 +49,7 @@ export default class ProductController {
       const categoryID = req.params.categoryID;
       const checkUuid = `Select productID,pUuid,name,detail,amount,price,image,category.title
       ,product.createdAt,product.updatedAt from product 
-       INNER JOIN category on category.cUuid = product.categoryID
+       INNER JOIN category on category.cUuid  COLLATE utf8mb4_general_ci= product.categoryID
        where product.categoryID=? `;
       connected.query(checkUuid, categoryID, (err, result) => {
         if (err)

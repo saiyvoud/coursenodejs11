@@ -37,6 +37,38 @@ export const FindOneOrder = async (oUuid) => {
     }
   });
 };
+export const FindOneOrderDetail = async (ordUuid) => {
+  return new Promise(async (resovle, reject) => {
+    try {
+      const checkorderDetail = "Select * from order_detail where ordUuid=?";
+      connected.query(checkorderDetail, ordUuid, (err, result) => {
+        if (err) reject(err);
+        if(!resovle[0]){
+          resovle(EMessage.NotFound)
+        }
+        resovle(result[0]);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+export const FindOneProduct = async (pUuid) => {
+  return new Promise(async (resovle, reject) => {
+    try {
+      const checkproduct = "Select * from product where pUuid=?";
+      connected.query(checkproduct, pUuid, (err, result) => {
+        if (err) reject(err);
+        if(!resovle[0]){
+          resovle(EMessage.NotFound)
+        }
+        resovle(result[0]);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 export const CheckEmail = async (email) => {
   return new Promise(async (resovle, reject) => {
     try {
